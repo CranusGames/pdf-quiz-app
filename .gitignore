@@ -1,3 +1,7 @@
+# Environment variables
+.env
+lib/services/gemini_service.dart
+
 # Miscellaneous
 *.class
 *.log
