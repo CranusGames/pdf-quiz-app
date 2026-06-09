@@ -20,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final _gemini = GeminiService();
 
   Future<void> _pickPdf() async {
-    final result = await FilePicker.pickFiles(
+    final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf'],
     );
@@ -80,8 +80,24 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
+        String msg = e.toString();
+        if (msg.contains('quota') || msg.contains('limit')) {
+          msg = 'API kotası doldu. Birkaç dakika bekleyip tekrar dene.';
+        } else if (msg.contains('not found') || msg.contains('not supported')) {
+          msg = 'Model bulunamadı. İnternet bağlantını kontrol et.';
+        } else if (msg.contains('API key')) {
+          msg = 'Geçersiz API key. Lütfen kontrol et.';
+        } else if (msg.contains('metin çıkarılamadı')) {
+          msg = 'PDF okunamadı. Taranmış/görsel PDF olabilir.';
+        } else if (msg.contains('network') || msg.contains('SocketException')) {
+          msg = 'İnternet bağlantısı yok.';
+        }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hata: $e')),
+          SnackBar(
+            content: Text(msg),
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(label: 'Tamam', onPressed: () {}),
+          ),
         );
       }
     }
